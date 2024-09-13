@@ -51,31 +51,6 @@ public class EmployeeService {
         employeeRepository.save(employee);
         return ErrorKinds.SUCCESS;
     }
-    
-    // 従業員更新
-    @Transactional
-    public ErrorKinds update(Employee employee) {
-        
-        if ("".equals(employee.getPassword())) {
-            Employee existingEmployee = findByCode(employee.getCode());
-            employee.setPassword(existingEmployee.getPassword());
-        } else {
-            ErrorKinds result = employeePasswordCheck(employee);
-            if (ErrorKinds.CHECK_OK != result) {
-                return result;
-            }
-        }
-        
-        employee.setDeleteFlg(false);
-        Employee existingEmployee = findByCode(employee.getCode());
-        employee.setCreatedAt(existingEmployee.getCreatedAt());
-        
-        LocalDateTime now = LocalDateTime.now();
-        employee.setUpdatedAt(now);
-        
-        employeeRepository.save(employee);
-        return ErrorKinds.SUCCESS;
-    }
 
     // 従業員削除
     @Transactional
@@ -142,6 +117,32 @@ public class EmployeeService {
         // 桁数チェック
         int passwordLength = employee.getPassword().length();
         return passwordLength < 8 || 16 < passwordLength;
+    }
+    
+    //従業員更新
+    @Transactional
+    public ErrorKinds update(Employee employee) {
+        Employee updateEmployee = findByCode(employee.getCode());
+        
+        // パスワードチェック
+        if(employee.getPassword().isEmpty()) {
+            
+            employee.setPassword(updateEmployee.getPassword());
+            
+        }else {
+            
+            ErrorKinds result = employeePasswordCheck(employee);
+            
+            if (ErrorKinds.CHECK_OK != result) {
+                return result;
+            }
+        }
+        LocalDateTime now = LocalDateTime.now();
+        employee.setCreatedAt(updateEmployee.getCreatedAt());
+        employee.setUpdatedAt(now);
+        
+        employeeRepository.save(employee);
+        return ErrorKinds.SUCCESS;
     }
 
 }

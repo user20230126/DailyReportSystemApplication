@@ -97,34 +97,6 @@ public class EmployeeController {
 
         return "redirect:/employees";
     }
-    
-    // 従業員更新画面
-    @GetMapping(value = "/{code}/update")
-    public String edit(@PathVariable String code, Model model) {
-        Employee employee = employeeService.findByCode(code);
-        
-        model.addAttribute("employee" , employee);
-        return "employees/update";
-    }
-    
-    // 従業員更新処理
-    @PostMapping(value = "/{code}/update")
-    public String update(@PathVariable String code, @Validated Employee employee, BindingResult res, Model model) {
-
-        // 入力チェック
-        if (res.hasErrors()) {
-            return "employees/update";
-        }
-
-        ErrorKinds result = employeeService.update(employee);
-
-        if (ErrorMessage.contains(result)) {
-            model.addAttribute(ErrorMessage.getErrorName(result), ErrorMessage.getErrorValue(result));
-            return "employees/update";
-        }
-
-        return "redirect:/employees";
-    }
 
     // 従業員削除処理
     @PostMapping(value = "/{code}/delete")
@@ -140,5 +112,46 @@ public class EmployeeController {
 
         return "redirect:/employees";
     }
+    
+    //従業員更新画面
+    @GetMapping(value = "/{code}/update")
+    public String getEmployee(@PathVariable("code") String code, Model model,@ModelAttribute Employee employee) {
+        
+        if (code == null) {
+            model.addAttribute("employee",employee);
+            return "employees/update";
+            
+        } else {
+            model.addAttribute("employee", employeeService.findByCode(code));
+            return "employees/update";
+        }
+    }
+    
+    // 従業員更新処理
+    @PostMapping(value = "/{code}/update")
+    public String update(@Validated Employee employee,BindingResult res, Model model) {
+        
+        if(res.hasErrors()) {
+            // エラーあり
+            return getEmployee(null,model,employee);
+        }
+        
+        try {
+            ErrorKinds result = employeeService.update(employee);
+
+            if (ErrorMessage.contains(result)) {
+                model.addAttribute(ErrorMessage.getErrorName(result), ErrorMessage.getErrorValue(result));
+                return getEmployee(null,model,employee);
+            }
+
+        } catch (DataIntegrityViolationException e) {
+            model.addAttribute(ErrorMessage.getErrorName(ErrorKinds.DUPLICATE_EXCEPTION_ERROR),
+                    ErrorMessage.getErrorValue(ErrorKinds.DUPLICATE_EXCEPTION_ERROR));
+            return getEmployee(null,model,employee);
+        }
+
+        return "redirect:/employees";
+    }
+    
 
 }
