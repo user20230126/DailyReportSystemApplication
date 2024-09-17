@@ -22,7 +22,7 @@
                             <form th:action="@{/reports/add}" th:object="${report}" th:method="post">
                                 <div class="wizard wizard-success mb-4">
                                     <div class="mb-3">
-                                        <label class="form-label" for="code">社員番号</label>
+                                        <label class="form-label" for="code">日付</label>
                                         <p class="mb-1"></p>
                                         <div class="col-md-7">
                                             <input class="form-control" type="date" th:field="*{reportDate}" th:errorclass="err" id="reportDate">
